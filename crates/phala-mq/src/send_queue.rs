@@ -176,9 +176,8 @@ mod msg_channel {
             &self,
             payload: alloc::vec::Vec<u8>,
             to: impl Into<Path>,
-            hash: MqHash,
         ) -> SigningMessage<Self::Signer> {
-            self.prepare_with_data(payload, to, hash)
+            self.prepare_with_data(payload, to, Default::default())
         }
     }
 }

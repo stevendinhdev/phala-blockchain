@@ -83,10 +83,9 @@ mod sender {
             &self,
             data: Vec<u8>,
             to: impl Into<Path>,
-            hash: phala_mq::MqHash,
         ) -> phala_mq::SigningMessage<Self::Signer> {
             let payload = self.encrypt_payload(data);
-            self.inner.mq.prepare_message_to(&payload, to, hash)
+            self.inner.mq.prepare_message_to(&payload, to)
         }
     }
 
