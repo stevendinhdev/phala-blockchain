@@ -38,10 +38,11 @@ impl MessageSendQueue {
         let hash = message.hash;
         if !entry.dummy {
             log::info!(target: "mq",
-                "Sending message, from={}, to={:?}, seq={}",
+                "Sending message, from={}, to={:?}, seq={}, hash={:?}",
                 message.message.sender,
                 message.message.destination,
                 entry.sequence,
+                &hash,
             );
             entry.messages.push(message);
         }

@@ -107,7 +107,8 @@ impl<'a> MsgSync<'a> {
                     continue;
                 }
                 let msg_info = format!(
-                    "sender={} seq={} dest={} nonce={:?}",
+                    "msg-hash={:?}, sender={}, seq={}, dest={}, nonce={:?},",
+                    &message.hash,
                     sender,
                     message.sequence,
                     String::from_utf8_lossy(&message.message.destination.path()[..]),
