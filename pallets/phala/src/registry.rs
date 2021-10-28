@@ -23,7 +23,7 @@ pub mod pallet {
 	use phala_types::{
 		messaging::{
 			self, bind_topic, DecodedMessage, GatekeeperChange, GatekeeperLaunch, MessageHashing,
-			MessageOrigin, SignedMessage, SystemEvent, WorkerEvent, WorkerPinkReport,
+			MessageOrigin, SystemEvent, WorkerEvent, WorkerPinkReport,
 		},
 		ContractPublicKey, EcdhPublicKey, MasterPublicKey, WorkerPublicKey, WorkerRegistrationInfo,
 	};
