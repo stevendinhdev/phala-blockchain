@@ -280,7 +280,9 @@ where
                 let tmp_key = crate::new_sr25519_key().derive_ecdh_key().unwrap();
                 let secret_mq = SecretMessageChannel::new(&tmp_key, &self.egress);
 
-                secret_mq.bind_remote_key(Some(&worker.0)).push_message(&message);
+                secret_mq
+                    .bind_remote_key(Some(&worker.0))
+                    .push_message(&message);
             }
         }
     }
@@ -1076,7 +1078,9 @@ pub mod tests {
     use super::{BlockInfo, FixedPoint, MessageChannel, MiningEconomics};
     use fixed_macro::types::U64F64 as fp;
     use parity_scale_codec::{Decode, Encode};
-    use phala_mq::{BindTopic, Message, MessageDispatcher, MessageOrigin, Path};
+    use phala_mq::{
+        traits::MessageChannelBase, BindTopic, Message, MessageDispatcher, MessageOrigin, Path,
+    };
     use phala_types::{messaging as msg, WorkerPublicKey};
     use std::cell::RefCell;
 
@@ -1132,8 +1136,13 @@ pub mod tests {
         }
     }
 
+    impl MessageChannelBase for CollectChannel {
+        fn last_hash(&self) -> phala_mq::MqHash {
+            Default::default()
+        }
+    }
     impl MessageChannel for CollectChannel {
-        fn push_data(&self, data: Vec<u8>, to: impl Into<Path>) {
+        fn push_data(&self, data: Vec<u8>, to: impl Into<Path>, _hash: phala_mq::MqHash) {
             let message = Message {
                 sender: MessageOrigin::Gatekeeper,
                 destination: to.into().into(),
