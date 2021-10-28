@@ -355,5 +355,5 @@ impl<Signer: MessageSigner> SigningMessage<Signer> {
 
 #[cfg(feature = "signers")]
 pub fn hash(data: &[u8]) -> MqHash {
-    MqHash(sp_core::twox_128(data))
+    MqHash(sp_core::blake2_128(data))
 }

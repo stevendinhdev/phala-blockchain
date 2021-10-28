@@ -14,6 +14,7 @@ primitive-types = { version = "0.10", default-features = false, features = ["cod
 sp-core = { path = "../../substrate/primitives/core", default-features = false}
 
 spin = { version = "0.9", default-features = false, features = ["mutex", "use_ticket_mutex"], optional = true }
+phala-mq-derive = { path = "./derive" }
 
 [features]
 default = ["dispatcher", "queue", "signers"]
