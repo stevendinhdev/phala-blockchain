@@ -117,7 +117,7 @@ impl<'a> MsgSync<'a> {
                 let extrinsic = self
                     .client
                     .create_signed(
-                        runtimes::phala_mq::SyncOffchainMessageCall {
+                        runtimes::phala_mq::SyncOffchainMessageV2Call {
                             _runtime: PhantomData,
                             message,
                         },

@@ -148,15 +148,15 @@ pub mod phala_mq {
     use core::marker::PhantomData;
     use subxt::{balances::Balances, module, system::System, Call};
 
-    use phala_types::messaging::SignedMessage;
+    use phala_types::messaging::SignedMessageV2;
 
     #[module]
     pub trait PhalaMq: System + Balances {}
 
     #[derive(Clone, Debug, PartialEq, Call, Encode)]
-    pub struct SyncOffchainMessageCall<T: PhalaMq> {
+    pub struct SyncOffchainMessageV2Call<T: PhalaMq> {
         pub _runtime: PhantomData<T>,
-        pub message: SignedMessage,
+        pub message: SignedMessageV2,
     }
 }
 
