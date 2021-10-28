@@ -760,7 +760,7 @@ impl<Platform: pal::Platform> PhactoryApi for RpcService<'_, Platform> {
         assert!(self.output_buf_len >= 1024);
         self.phactory
             .get_egress_messages(self.output_buf_len - 1024)
-            .map(pb::GetEgressMessagesResponse::new)
+            .map(|messages| pb::GetEgressMessagesResponse::new(messages, 2))
     }
 
     fn contract_query(

@@ -239,14 +239,14 @@ pub mod group {
 pub mod messaging {
     use parity_scale_codec::{Decode, Encode};
     use phala_crypto::sr25519::Sr25519SecretKey;
-    use phala_mq::{bind_topic, ContractGroupId};
+    use phala_mq::{bind_topic, ContractGroupId, MessageHashing};
     use phala_types::WorkerPublicKey;
     use pink::types::AccountId;
 
     pub use phala_types::messaging::WorkerPinkReport;
 
     bind_topic!(WorkerPinkRequest, b"phala/pink/worker/request");
-    #[derive(Encode, Decode, Debug)]
+    #[derive(Encode, Decode, Debug, MessageHashing)]
     pub enum WorkerPinkRequest {
         Instantiate {
             group_id: ContractGroupId,

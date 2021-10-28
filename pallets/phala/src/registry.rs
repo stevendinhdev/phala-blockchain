@@ -22,8 +22,8 @@ pub mod pallet {
 
 	use phala_types::{
 		messaging::{
-			self, bind_topic, DecodedMessage, GatekeeperChange, GatekeeperLaunch, MessageOrigin,
-			SignedMessage, SystemEvent, WorkerEvent, WorkerPinkReport,
+			self, bind_topic, DecodedMessage, GatekeeperChange, GatekeeperLaunch, MessageHashing,
+			MessageOrigin, SignedMessage, SystemEvent, WorkerEvent, WorkerPinkReport,
 		},
 		ContractPublicKey, EcdhPublicKey, MasterPublicKey, WorkerPublicKey, WorkerRegistrationInfo,
 	};
@@ -33,6 +33,20 @@ pub mod pallet {
 	pub enum RegistryEvent {
 		BenchReport { start_time: u64, iterations: u64 },
 		MasterPubkey { master_pubkey: MasterPublicKey },
+	}
+
+	#[cfg(feature = "std")]
+	impl MessageHashing for RegistryEvent {
+		fn hash(&self) -> messaging::MqHash {
+			use RegistryEvent::*;
+			match self {
+				BenchReport {
+					start_time,
+					iterations: _, // The iterations is varing, don't hash it.
+				} => messaging::hash(&start_time.encode()),
+				MasterPubkey { .. } => messaging::hash(&self.encode()),
+			}
+		}
 	}
 
 	#[pallet::config]

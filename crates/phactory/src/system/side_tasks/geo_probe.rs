@@ -109,7 +109,7 @@ pub fn process_block(
             let message = GeolocationCommand::update_geolocation(None);
             let secret_channel =
                 secret_channel::bind_remote(&egress, &my_ecdh_key, Some(&remote_pubkey));
-            [secret_channel.prepare_message_to(&message, &topic[..])]
+            [secret_channel.prepare_message_to(&message, &topic[..], Default::default())]
         };
 
         side_task_man.add_async_task(block_number, duration, default_messages, async move {
@@ -163,8 +163,9 @@ pub fn process_block(
             let secret_channel =
                 secret_channel::bind_remote(&egress, &my_ecdh_key, Some(&remote_pubkey));
             let topic = contract::command_topic(contract::id256(contract::GEOLOCATION));
-            //6. send the command
-            Ok([secret_channel.prepare_message_to(&msg, topic)])
+            // 6. send the command
+            // The payload if varing on replay, so don't hash it.
+            Ok([secret_channel.prepare_message_to(&msg, topic, Default::default())])
         });
     }
 }

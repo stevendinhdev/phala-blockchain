@@ -954,12 +954,19 @@ pub fn apply_pink_side_effects(
         use pink::runtime::EgressMessage;
         match message {
             EgressMessage::Message(message) => {
-                contract.push_message(message.payload, message.topic);
+                let hash = phala_mq::hash(&message.encode());
+                contract.push_message(
+                    message.payload,
+                    message.topic,
+                    hash,
+                );
             }
             EgressMessage::OspMessage(message) => {
+                let hash = phala_mq::hash(&message.encode());
                 contract.push_osp_message(
                     message.message.payload,
                     message.message.topic,
+                    hash,
                     message.remote_pubkey.as_ref(),
                 );
             }

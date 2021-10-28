@@ -33,7 +33,7 @@ pub use support::*;
 mod support {
     use phala_crypto::ecdh::EcdhPublicKey;
     use phala_mq::traits::MessageChannel;
-    use ::pink::runtime::ExecSideEffects;
+    use phala_mq::MqHash;
     use runtime::BlockNumber;
 
     use super::pink::group::GroupKeeper;
@@ -75,11 +75,12 @@ mod support {
         fn group_id(&self) -> Option<phala_mq::ContractGroupId>;
         fn process_next_message(&mut self, env: &mut ExecuteEnv) -> Option<TransactionResult>;
         fn on_block_end(&mut self, env: &mut ExecuteEnv) -> TransactionResult;
-        fn push_message(&self, payload: Vec<u8>, topic: Vec<u8>);
+        fn push_message(&self, payload: Vec<u8>, topic: Vec<u8>, hash: MqHash);
         fn push_osp_message(
             &self,
             payload: Vec<u8>,
             topic: Vec<u8>,
+            hash: MqHash,
             remote_pubkey: Option<&EcdhPublicKey>,
         );
     }
@@ -217,20 +218,21 @@ mod support {
             Ok(Default::default())
         }
 
-        fn push_message(&self, payload: Vec<u8>, topic: Vec<u8>) {
-            self.send_mq.push_data(payload, topic)
+        fn push_message(&self, payload: Vec<u8>, topic: Vec<u8>, hash: MqHash) {
+            self.send_mq.push_data(payload, topic, hash)
         }
 
         fn push_osp_message(
             &self,
             payload: Vec<u8>,
             topic: Vec<u8>,
+            hash: MqHash,
             remote_pubkey: Option<&EcdhPublicKey>,
         ) {
             let secret_mq = SecretMessageChannel::new(&self.ecdh_key, &self.send_mq);
             secret_mq
                 .bind_remote_key(remote_pubkey)
-                .push_data(payload, topic)
+                .push_data(payload, topic, hash)
         }
     }
 }

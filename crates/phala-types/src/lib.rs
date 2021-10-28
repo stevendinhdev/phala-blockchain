@@ -23,7 +23,7 @@ pub mod messaging {
     use super::{EcdhPublicKey, MasterPublicKey, WorkerPublicKey};
     use crate::contract;
     pub use phala_mq::types::*;
-    pub use phala_mq::{bind_contract32, bind_topic};
+    pub use phala_mq::{bind_contract32, bind_topic, MessageHashing};
 
     // TODO.kevin: reuse the Payload in secret_channel.rs.
     #[derive(Encode, Decode, Debug)]
@@ -37,7 +37,7 @@ pub mod messaging {
     // Messages: Lottery
 
     bind_topic!(Lottery, b"^phala/BridgeTransfer");
-    #[derive(Encode, Decode, Clone, Debug)]
+    #[derive(Encode, Decode, Clone, Debug, MessageHashing)]
     pub enum Lottery {
         SignedTx {
             round_id: u32,
@@ -123,7 +123,7 @@ pub mod messaging {
     }
 
     bind_topic!(BalancesTransfer<AccountId, Balance>, b"^phala/balances/transfer");
-    #[derive(Encode, Decode)]
+    #[derive(Encode, Decode, MessageHashing)]
     pub struct BalancesTransfer<AccountId, Balance> {
         pub dest: AccountId,
         pub amount: Balance,
@@ -209,7 +209,7 @@ pub mod messaging {
     }
 
     bind_topic!(KittyTransfer<AccountId>, b"^phala/kitties/transfer");
-    #[derive(Debug, Clone, Encode, Decode, PartialEq)]
+    #[derive(Debug, Clone, Encode, Decode, PartialEq, MessageHashing)]
     pub struct KittyTransfer<AccountId> {
         pub dest: AccountId,
         pub kitty_id: Vec<u8>,
@@ -328,8 +328,22 @@ pub mod messaging {
         },
     }
 
+    #[cfg(feature = "std")]
+    impl MessageHashing for MiningReportEvent {
+        fn hash(&self) -> MqHash {
+            match self {
+                MiningReportEvent::Heartbeat {
+                    session_id,
+                    challenge_block,
+                    challenge_time,
+                    iterations: _,
+                } => hash(&(session_id, challenge_block, challenge_time).encode()),
+            }
+        }
+    }
+
     bind_topic!(MiningInfoUpdateEvent<BlockNumber>, b"^phala/mining/update");
-    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq)]
+    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, MessageHashing)]
     pub struct MiningInfoUpdateEvent<BlockNumber> {
         /// The block emiting this message.
         pub block_number: BlockNumber,
@@ -426,7 +440,7 @@ pub mod messaging {
 
     // Messages: Distribution of master key and contract keys
     bind_topic!(KeyDistribution, b"phala/gatekeeper/key");
-    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq)]
+    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, MessageHashing)]
     pub enum KeyDistribution {
         MasterKeyDistribution(DispatchMasterKeyEvent),
     }
@@ -462,7 +476,7 @@ pub mod messaging {
 
     // Messages: Gatekeeper
     bind_topic!(GatekeeperEvent, b"phala/gatekeeper/event");
-    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq)]
+    #[derive(Encode, Decode, Clone, Debug, PartialEq, Eq, MessageHashing)]
     pub enum GatekeeperEvent {
         NewRandomNumber(RandomNumberEvent),
         TokenomicParametersChanged(TokenomicParameters),
@@ -517,7 +531,7 @@ pub mod messaging {
     // Pink messages
 
     bind_topic!(WorkerPinkReport, b"phala/pink/worker/report");
-    #[derive(Encode, Decode, Debug)]
+    #[derive(Encode, Decode, Debug, MessageHashing)]
     pub enum WorkerPinkReport {
         PinkInstantiated {
             id: ContractId,
@@ -581,12 +595,11 @@ pub struct Score {
 }
 
 type MachineId = Vec<u8>;
-pub use sp_core::sr25519::Signature as Sr25519Signature;
 pub use sp_core::sr25519::Public as WorkerPublicKey;
 pub use sp_core::sr25519::Public as ContractPublicKey;
 pub use sp_core::sr25519::Public as MasterPublicKey;
 pub use sp_core::sr25519::Public as EcdhPublicKey;
-
+pub use sp_core::sr25519::Signature as Sr25519Signature;
 
 #[derive(Encode, Decode, Debug, Clone, PartialEq, Eq)]
 pub struct WorkerRegistrationInfo<AccountId> {

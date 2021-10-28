@@ -22,7 +22,9 @@ impl TaskWrapper {
         for msg in messages {
             context
                 .send_mq
-                .enqueue_message(msg.message.sender.clone(), |seq| msg.sign(seq));
+                .enqueue_message(msg.message.sender.clone(), |seq, parent_hash| {
+                    msg.sign(seq, parent_hash)
+                });
         }
     }
 }
@@ -155,7 +157,9 @@ pub mod async_side_task {
             future: F,
         ) {
             let task = AsyncSideTask::spawn(future);
-            self.add_task(current_block, duration, default_messages, |context| task.finish(context));
+            self.add_task(current_block, duration, default_messages, |context| {
+                task.finish(context)
+            });
         }
     }
 }
