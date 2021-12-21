@@ -1,5 +1,6 @@
 mod extension;
 mod mock_types;
+mod pallet_pink;
 
 use crate::types::{AccountId, Balance, BlockNumber, Hash, Hashing, Index};
 use frame_support::weights::Weight;
@@ -27,6 +28,7 @@ frame_support::construct_runtime! {
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
         Randomness: pallet_randomness_collective_flip::{Pallet, Storage},
         Contracts: pallet_contracts::{Pallet, Call, Storage, Event<T>},
+        Pink: pallet_pink::{Pallet, Storage},
     }
 }
 
@@ -36,6 +38,8 @@ parameter_types! {
         frame_system::limits::BlockWeights::simple_max(2 * WEIGHT_PER_SECOND);
     pub static ExistentialDeposit: u64 = 0;
 }
+
+impl pallet_pink::Config for PinkRuntime {}
 
 impl frame_system::Config for PinkRuntime {
     type BaseCallFilter = frame_support::traits::Everything;
@@ -113,6 +117,7 @@ impl Config for PinkRuntime {
     type DeletionWeightLimit = DeletionWeightLimit;
     type Schedule = DefaultSchedule;
     type ContractDeposit = ();
+    type AddressGenerator = Pink;
 }
 
 #[cfg(test)]
@@ -212,10 +217,9 @@ mod tests {
                 // We offset data in the contract tables by 1.
                 let mut params = vec![(n + 1) as u8];
                 params.extend_from_slice(input);
-                let result =
-                    Contracts::bare_call(ALICE, addr.clone(), 0, GAS_LIMIT, params, false)
-                        .result
-                        .unwrap();
+                let result = Contracts::bare_call(ALICE, addr.clone(), 0, GAS_LIMIT, params, false)
+                    .result
+                    .unwrap();
                 assert!(result.is_success());
                 let expected = hash_fn(input.as_ref());
                 assert_eq!(&result.data[..*expected_size], &*expected);
@@ -225,9 +229,7 @@ mod tests {
 
     pub mod exec {
         use sp_runtime::traits::BlakeTwo256;
-        use sp_state_machine::{
-            Backend, Ext, OverlayedChanges, StorageTransactionCache,
-        };
+        use sp_state_machine::{Backend, Ext, OverlayedChanges, StorageTransactionCache};
         pub type InMemoryBackend = sp_state_machine::InMemoryBackend<BlakeTwo256>;
 
         pub fn execute_with<R>(f: impl FnOnce() -> R) -> R {
