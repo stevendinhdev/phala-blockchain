@@ -15,8 +15,8 @@ const { decorateStakePool } = require('./utils/displayUtils');
 function run(afn) {
     function runner(...args) {
         afn(...args)
-            .catch(console.error)
             .then(process.exit)
+            .catch(console.error)
             .finally(() => process.exit(-1));
     };
     return runner;
@@ -74,9 +74,12 @@ function pruntimeApi() {
 }
 
 async function substrateApi() {
-    const { substrateWsEndpoint, at } = program.opts();
+    const { substrateWsEndpoint, substrateNoRetry, at } = program.opts();
     const wsProvider = new WsProvider(substrateWsEndpoint);
-    const api = await ApiPromise.create({ provider: wsProvider, types: phalaTypes });
+    const api = await ApiPromise.create({
+        provider: wsProvider,
+        throwOnConnect: !substrateNoRetry,
+    });
     if (at) {
         return await api.at(at);
     }
@@ -96,6 +99,7 @@ const CONTRACT_PDIEM = 5;
 program
     .option('--pruntime-endpoint <url>', 'pRuntime API endpoint', process.env.PRUNTIME_ENDPOINT || 'http://localhost:8000')
     .option('--substrate-ws-endpoint <url>', 'Substrate WS endpoint', process.env.ENDPOINT || 'ws://localhost:9944')
+    .option('--substrate-no-retry', false)
     .option('--at <hash>', 'access the state at a certain block', null)
     .option('--json', 'output regular json', false);
 
