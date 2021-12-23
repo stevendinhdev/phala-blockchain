@@ -5,7 +5,6 @@ const axios = require('axios').default;
 const { Decimal } = require('decimal.js');
 const { ApiPromise, Keyring, WsProvider } = require('@polkadot/api');
 const { cryptoWaitReady, blake2AsHex } = require('@polkadot/util-crypto');
-const phalaTypes = require('@phala/typedefs').khalaDev;
 
 const { FixedPointConverter } = require('./utils/fixedUtils');
 const tokenomic  = require('./utils/tokenomic');
